@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Todo List</title>
+  <style>
+    /* Basic styling */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      width: 50%;
+      text-align: center;
+    }
+    input[type="text"] {
+      width: 70%;
+      padding: 8px;
+      margin: 5px 0;
+    }
+    button {
+      padding: 8px;
+      margin: 5px 0;
+    }
+    .completed {
+      text-decoration: line-through;
+      color: #888;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Todo List</h1>
+    <input type="text" id="taskInput" placeholder="Enter a task">
+    <button onclick="addTask()">Add</button>
+    <ul id="taskList"></ul>
+  </div>
+
+  <script>
+    // Load tasks from local storage on page load
+    document.addEventListener("DOMContentLoaded", function () {
+      loadTasks();
+    });
+
+    function addTask() {
+      var taskInput = document.getElementById("taskInput");
+      var task = taskInput.value.trim();
+      if (task !== "") {
+        var ul = document.getElementById("taskList");
+        var li = document.createElement("li");
+        li.innerHTML = '<span onclick="toggleCompletion(this)">' + task + '</span>' +
+          ' <button onclick="editTask(this)">Edit</button>' +
+          ' <button onclick="deleteTask(this)">Delete</button>';
+        ul.appendChild(li);
+        taskInput.value = "";
+        saveTasks();
+      }
+    }
+
+    function editTask(taskElement) {
+      var updatedTask = prompt("Edit task:", taskElement.previousElementSibling.textContent);
+      if (updatedTask !== null && updatedTask.trim() !== "") {
+        taskElement.previousElementSibling.textContent = updatedTask;
+        saveTasks();
+      }
+    }
+
+    function deleteTask(taskElement) {
+      taskElement.parentElement.remove();
+      saveTasks();
+    }
+
+    function toggleCompletion(taskElement) {
+      taskElement.classList.toggle("completed");
+      saveTasks();
+    }
+
+    function saveTasks() {
+      var tasks = [];
+      var taskElements = document.querySelectorAll("#taskList li span");
+      taskElements.forEach(function (taskElement) {
+        tasks.push({
+          text: taskElement.textContent,
+          completed: taskElement.classList.contains("completed"),
+        });
+      });
+      localStorage.setItem("tasks", JSON.stringify(tasks));
+    }
+
+    function loadTasks() {
+      var tasks = localStorage.getItem("tasks");
+      if (tasks) {
+        tasks = JSON.parse(tasks);
+        var ul = document.getElementById("taskList");
+        tasks.forEach(function (task) {
+          var li = document.createElement("li");
+          li.innerHTML = '<span onclick="toggleCompletion(this)"' + (task.completed ? ' class="completed"' : '') + '>' + task.text + '</span>' +
+            ' <button onclick="editTask(this)">Edit</button>' +
+            ' <button onclick="deleteTask(this)">Delete</button>';
+          ul.appendChild(li);
+        });
+      }
+    }
+  </script>
+</body>
+</html>
